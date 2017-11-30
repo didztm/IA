@@ -1,18 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-enum e_state
-{
-    INVALID = -1,
-    JUMPING,
-    ROTATING,
-    CROUNCHING,
-    DEAD,
-    STANDING,
-    RUNNING,
-    MOVING
-}
-public class Cube : MonoBehaviour
+
+public class Player : MonoBehaviour
 {
     #region Public Members
 
@@ -37,7 +27,11 @@ public class Cube : MonoBehaviour
     }
     void Update()
     {
-        Debug.Log(e_cube_state);
+        if (debug)
+        {
+            Debug.Log(e_cube_state);
+        }
+        
         if (Input.GetKeyUp(KeyCode.RightControl))
             e_cube_state = e_state.MOVING;
         if (Input.GetKey(KeyCode.RightControl) && e_cube_state == e_state.MOVING)
@@ -65,7 +59,7 @@ public class Cube : MonoBehaviour
             e_cube_state = e_state.JUMPING;
 
         }
-
+        
         StateAction(e_cube_state);
 
     }
@@ -108,14 +102,18 @@ public class Cube : MonoBehaviour
         }
 
     }
-    private void Move(float speed,bool boolJump,bool boolCrounch)
+    private void Move(float speed,bool boolJump,bool boolCrounch, bool _debug = false)
     {
 
         Vector3 v = Vector3.zero;
         v.x = m_transform.position.x+ Input.GetAxisRaw("Vertical") * Time.deltaTime*speed;
         v.z = m_transform.position.z+-(Input.GetAxisRaw("Horizontal") * Time.deltaTime*speed);
         v.y = m_transform.position.y;
-        Debug.Log(speed);
+        if (_debug)
+        {
+            Debug.Log(speed);
+        }
+        
         if (boolJump) {
             Jump(jumpForce);
         }
@@ -126,17 +124,16 @@ public class Cube : MonoBehaviour
         m_transform.position=v;
 
     }
-    private void Crounch() {
+    private void Crounch(bool _debug=false) {
         Vector3 v = new Vector3(1f, 0.5f, 1f);
         m_transform.localScale=v;
-        Debug.Log("test");
     }
-    private void Stand() {
+    private void Stand(bool _debug = false) {
         Vector3 v = new Vector3(1f, 1f, 1f);
         m_transform.localScale = v;
         m_transform.localScale.Set(1f, 1f, 1f);
     }
-    private void Jump(float jumpForce) {
+    private void Jump(float jumpForce, bool _debug = false) {
         if (m_rigidbody.position.y < 0.6)
         {
             m_rigidbody.AddForce(Vector3.up * 500f);
@@ -172,10 +169,21 @@ public class Cube : MonoBehaviour
 
         }*/
     }
-   
+
     #endregion
 
     #region Private and Protected Members
+    private enum e_state
+    {
+        INVALID = -1,
+        JUMPING,
+        ROTATING,
+        CROUNCHING,
+        DEAD,
+        STANDING,
+        RUNNING,
+        MOVING
+    }
     private Transform m_transform;
     private BoxCollider col;
     private float gravity = 14.0f;
@@ -184,6 +192,7 @@ public class Cube : MonoBehaviour
     private float verticalVelocity;
     private Rigidbody m_rigidbody;
     private float mass;
+    private bool debug=false;
     #endregion
 }
 /*
