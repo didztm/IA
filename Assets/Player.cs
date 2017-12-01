@@ -16,14 +16,13 @@ public class Player : MonoBehaviour
 
     void Awake()
     {
-        
 
+        m_rigidbody = GetComponent<Rigidbody>();
+        m_transform = GetComponent<Transform>();
     }
     private void Start()
     {
-        m_rigidbody = GetComponent<Rigidbody>();
-        m_transform = transform;
-       // Debug.Log(m_transform.position);
+        
     }
     void Update()
     {
@@ -31,37 +30,9 @@ public class Player : MonoBehaviour
         {
             Debug.Log(e_cube_state);
         }
-        
-        if (Input.GetKeyUp(KeyCode.RightControl))
-            e_cube_state = e_state.MOVING;
-        if (Input.GetKey(KeyCode.RightControl) && e_cube_state == e_state.MOVING)
-            e_cube_state = e_state.RUNNING;
-        if (Input.GetKeyDown(KeyCode.UpArrow))
-            e_cube_state = e_state.MOVING;
-        if (Input.GetKeyDown(KeyCode.LeftArrow))
-            e_cube_state = e_state.MOVING;
-        if (Input.GetKeyDown(KeyCode.DownArrow))
-            e_cube_state = e_state.MOVING;
-        if (Input.GetKeyDown(KeyCode.RightArrow))
-            e_cube_state = e_state.MOVING;
-        if (Input.GetKeyDown(KeyCode.RightShift))
-            e_cube_state = e_state.CROUNCHING;
-        if (Input.GetKeyUp(KeyCode.RightShift))
-        {
-            Stand();
-            e_cube_state = e_state.MOVING;
-        }
-            
-        //if (Input.GetKeyUp(KeyCode.RightControl)) m_speed = 5f;
-
-        if (Input.GetKeyDown(KeyCode.Return))
-        {
-            e_cube_state = e_state.JUMPING;
-
-        }
-        
+        ManageInput();
         StateAction(e_cube_state);
-
+        Debug.Log("Update_end():" + m_transform.position);
     }
 
     #endregion
@@ -82,7 +53,7 @@ public class Player : MonoBehaviour
                 Move(m_speed, false, true);
                 break;
             case e_state.JUMPING:
-               // Debug.Log("Je saute");
+               if(debug) Debug.Log("Je saute");
                 Move(m_speed, true, false);
                 e_cube_state = e_state.MOVING;
                 break;
@@ -102,18 +73,40 @@ public class Player : MonoBehaviour
         }
 
     }
-    private void Move(float speed,bool boolJump,bool boolCrounch, bool _debug = false)
+    private void ManageInput()
     {
-
-        Vector3 v = Vector3.zero;
-        v.x = m_transform.position.x+ Input.GetAxisRaw("Vertical") * Time.deltaTime*speed;
-        v.z = m_transform.position.z+-(Input.GetAxisRaw("Horizontal") * Time.deltaTime*speed);
-        v.y = m_transform.position.y;
-        if (_debug)
+        if (Input.GetKeyDown(KeyCode.Return))
         {
-            Debug.Log(speed);
+            e_cube_state = e_state.JUMPING;
         }
-        
+        if (Input.GetKeyUp(KeyCode.RightControl))
+            e_cube_state = e_state.MOVING;
+        if (Input.GetKey(KeyCode.RightControl) && e_cube_state == e_state.MOVING)
+            e_cube_state = e_state.RUNNING;
+        if (Input.GetKeyDown(KeyCode.UpArrow))
+            e_cube_state = e_state.MOVING;
+        if (Input.GetKeyDown(KeyCode.LeftArrow))
+            e_cube_state = e_state.MOVING;
+        if (Input.GetKeyDown(KeyCode.DownArrow))
+            e_cube_state = e_state.MOVING;
+        if (Input.GetKeyDown(KeyCode.RightArrow))
+            e_cube_state = e_state.MOVING;
+        if (Input.GetKeyDown(KeyCode.RightShift))
+            e_cube_state = e_state.CROUNCHING;
+        if (Input.GetKeyUp(KeyCode.RightShift))
+        {
+            Stand();
+            e_cube_state = e_state.MOVING;
+        }
+    }
+    private void Move(float speed,bool boolJump,bool boolCrounch)
+    {
+        m_t_position = m_transform.position;
+        Vector3 v = Vector3.zero;
+        v.x = m_t_position.x+ Input.GetAxisRaw("Vertical") * Time.deltaTime*speed;
+        v.z = m_t_position.z+-(Input.GetAxisRaw("Horizontal") * Time.deltaTime*speed);
+        v.y = m_t_position.y;
+        if (debug)Debug.Log(boolJump);
         if (boolJump) {
             Jump(jumpForce);
         }
@@ -133,41 +126,27 @@ public class Player : MonoBehaviour
         m_transform.localScale = v;
         m_transform.localScale.Set(1f, 1f, 1f);
     }
-    private void Jump(float jumpForce, bool _debug = false) {
-        if (m_rigidbody.position.y < 0.6)
+    private void Jump(float jumpForce) {
+        
+        if (Isgrounded())
         {
-            m_rigidbody.AddForce(Vector3.up * 500f);
-        }
-      
-        
-        
+            if (debug) Debug.Log("Jump2");
+            m_rigidbody.AddForce(Vector3.up * 500000f);
+        } 
     }
-
-    private void Gravity() {
-
-        if (m_transform.position.y > 1f)
+    private bool Isgrounded() {
+        Vector3 vo = transform.position;
+        Vector3 vd = new Vector3(0f, -0.1f, 0f);
+        RaycastHit hit;
+        if(debug)Debug.DrawRay(vo,vd,Color.red);
+        if (Physics.Raycast(vo, vd, out hit, 0.6f))
         {
-            mass += 1f ;
-            m_rigidbody.mass = mass;
-            
+            if (hit.collider.CompareTag("Ground"))
+            {
+                return true;
+            }
         }
-        //Debug.Log(m_rigidbody.position.y);
-        if (m_rigidbody.position.y<=0.5 && mass>1f) {
-            Debug.Log(mass);
-            
-            m_rigidbody.AddForce(-Vector3.up * 10f, ForceMode.Force);
-            mass = 1f;
-            m_rigidbody.position.Set(m_rigidbody.position.x, 0.5f, m_rigidbody.position.z);
-            m_rigidbody.mass = mass;
-        }/*
-        if
-        {
-            mass = 1f;
-            // m_rigidbody.AddForce(-Vector3.up * jumpForce, ForceMode.Force);
-            m_rigidbody.mass = mass;
-            m_rigidbody.position.Set(m_rigidbody.position.x, 0.5f, m_rigidbody.position.z);
-
-        }*/
+        return false;
     }
 
     #endregion
@@ -192,7 +171,8 @@ public class Player : MonoBehaviour
     private float verticalVelocity;
     private Rigidbody m_rigidbody;
     private float mass;
-    private bool debug=false;
+    private bool debug=true;
+    private Vector3 m_t_position;
     #endregion
 }
 /*

@@ -23,9 +23,8 @@ public class Ennemy : MonoBehaviour
        
 
     }
-    void Start()
+    private void Awake()
     {
-       
         m_rigidbody = GetComponent<Rigidbody>();
         m_transform = transform;
         m_col = GetComponent<Collider>();
@@ -42,6 +41,11 @@ public class Ennemy : MonoBehaviour
         coneRay[8] = new Ray(vo, new Vector3(10f, -1f, 1f));
         coneRay[9] = new Ray(vo, new Vector3(10f, 2f, 0f));
         coneRay[10] = new Ray(vo, new Vector3(10f, -2f, 0f));
+    }
+    void Start()
+    {
+       
+       
     }
 
     void Update()
@@ -161,7 +165,7 @@ public class Ennemy : MonoBehaviour
     }
     private void Move(float speed, bool boolJump, bool boolCrounch)
     {
-
+ 
 
     }
     private void Crounch()
@@ -209,7 +213,7 @@ public class Ennemy : MonoBehaviour
     private float alertDist;
     private float attackDist;
     private float walkingDist;
-    private bool m_debug = true;
+    private bool m_debug = false;
     private e_state e_ennemy_state = e_state.SEARCHING;
     private RaycastHit hit = new RaycastHit();
     private RaycastHit sphereHit = new RaycastHit();
